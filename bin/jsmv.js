@@ -7,7 +7,6 @@ var nopt = require('nopt'),
     filter = require('stream-police'),
     file_stream = require('stream').Readable(),
     dps = require('dotpath-stream'),
-    split = require('split'),
     path = require('path'),
     package = require('../package.json'),
     noptions = {
