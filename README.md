@@ -19,10 +19,10 @@ or even
 
 Options are:
 
-* `--from, -f <modulename>` Find files that require <modulename>
-* `--to, -t <modulename>` Rename all matches to <modulename>
-* `--dir, -d <dir>` Search js files in <dir> (default CWD)
-* `--file, -F <file>` Only search <file> for relevant modules
+* `--from, -f <modulename>` Find files that require `<modulename>`
+* `--to, -t <modulename>` Rename all matches to `<modulename>`
+* `--dir, -d <dir>` Search javascript files in `<dir>` (default CWD)
+* `--file, -F <file>` Only search `<file>` for relevant modules
 * `--version, -v` Print current version
 * `--help, -h` This thing
 
