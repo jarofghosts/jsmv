@@ -55,8 +55,8 @@ function jsmv(options) {
           }
 
           if (options.from === req_string) {
-            total++
             stream.queue('Updating ' + filename + '...\n')
+
             code = data.slice(0, node.range[0])
             lines = code.split('\n')
             column = lines[lines.length - 1].length + 1
@@ -77,6 +77,8 @@ function jsmv(options) {
               replace_rex,
               '$1' + to
             )
+
+            total++
           }
         })
 
