@@ -66,7 +66,7 @@ function jsmv(options) {
 
             if (options.relative_to) {
               if (!/^\./.test(to)) to = (/\//.test(to) ? '.' : './') + to
-              if (/\.js$/.test(to)) to = to.slice(-3)
+              if (/\.js$/.test(to)) to = to.slice(0, -3)
             }
 
             line_number = code.match(/\n/g).length
