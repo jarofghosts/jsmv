@@ -54,7 +54,7 @@ options.to = options.to || options.argv.remain[1]
 
 if (!options.from || !options.to) return help()
 
-fs.exists(options.to, run_jsmv)
+fs.exists(path.resolve(process.cwd(), options.to), check_from)
 
 function version() {
   process.stdout.write('jsmv version ' + package.version + '\n')
@@ -65,8 +65,14 @@ function help() {
   fs.createReadStream(path.join(__dirname, '../help.txt')).pipe(process.stdout)
 }
 
-function run_jsmv(is_relative) {
+function check_from(is_relative) {
   options.relative_to = is_relative
+
+  fs.exists(path.resolve(process.cwd(), options.from), run_jsmv)
+}
+
+function run_jsmv(is_relative) {
+  if (is_relative) options.from = path.resolve(process.cwd(), options.from)
 
   input
     .pipe(filter({ verify: [/\.js$/] }))
