@@ -1,6 +1,8 @@
 jsmv
 ====
 
+[![Build Status](https://travis-ci.org/jarofghosts/jsmv.png?branch=master)](https://travis-ci.org/jarofghosts/jsmv)
+
 move around module names
 
 ## why
