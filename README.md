@@ -3,9 +3,16 @@ jsmv
 
 move around module names
 
-## what
+## why
+
+so you can do `jsmv old-module.js new-module.js`
+
+or even
+
+`jsmv modules/my-request.js request`
 
 ## usage
+
 `jsmv [options] [from] [to]`
 
 Options are:
