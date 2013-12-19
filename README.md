@@ -5,6 +5,10 @@ jsmv
 
 move around module names
 
+## installation
+
+`npm install -g jsmv`
+
 ## why
 
 so you can do `jsmv old-module.js new-module.js`
