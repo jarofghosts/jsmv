@@ -1,0 +1,38 @@
+{
+  "name": "jsmv",
+  "version": "0.0.0",
+  "preferGlobal": true,
+  "bin": {
+    "jsmv": "./bin/jsmv"
+  },
+  "description": "rename modules in js files",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jarofghosts/jsmv.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jarofghosts/jsmv/issues"
+  },
+  "homepage": "https://github.com/jarofghosts/jsmv",
+  "scripts": {
+    "test": "node test/test.js && node test/relative-test.js"
+  },
+  "keywords": [
+    "rename",
+    "modules",
+    "codebase"
+  ],
+  "author": "jesse keane",
+  "license": "MIT",
+  "dependencies": {
+    "through": "~2.3.4",
+    "falafel": "~0.3.1",
+    "cssauron-falafel": "~1.2.1",
+    "stream-police": "0.0.2",
+    "nopt": "~2.1.2",
+    "ls-stream": "~1.0.0",
+    "dotpath-stream": "0.0.0",
+    "split": "~0.2.10"
+  }
+}
