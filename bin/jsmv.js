@@ -6,9 +6,11 @@ var nopt = require('nopt'),
     lsstream = require('ls-stream'),
     filter = require('stream-police'),
     file_stream = require('stream').Readable(),
+    through = require('through'),
     dps = require('dotpath-stream'),
     path = require('path'),
     package = require('../package.json'),
+    ignore_node_modules = through(filter_entry),
     noptions = {
       version: Boolean,
       help: Boolean,
@@ -43,9 +45,9 @@ file_stream._read = function () {
 if (options.file) {
   input = file_stream
 } else if (options.dir) {
-  input = lsstream(path.resolve(options.dir)).pipe(dps('path'))
+  input = lsstream(path.resolve(options.dir)).pipe(ignore_node_modules).pipe(dps('path'))
 } else {
-  input = lsstream(process.cwd()).pipe(dps('path'))
+  input = lsstream(process.cwd()).pipe(ignore_node_modules).pipe(dps('path'))
 }
 
 options.from = options.from || options.argv.remain[0]
@@ -77,4 +79,17 @@ function run_jsmv(is_relative) {
     .pipe(filter({ verify: [/\.js$/] }))
     .pipe(jsmv(options))
     .pipe(process.stdout)
+}
+
+function filter_entry(entry) {
+  var rel = path.resolve(path.join(entry.path, '..'))
+    , ignore
+
+  ignore = entry.path.replace(rel + '/', '') === 'node_modules'
+  ignore = ignore && entry.stat.isDirectory()
+  if(ignore) {
+    entry.ignore()
+  }
+
+  this.queue(entry)
 }
