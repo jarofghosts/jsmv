@@ -83,9 +83,16 @@ function run_jsmv(is_relative) {
 
 function filter_entry(entry) {
   var rel = path.resolve(path.join(entry.path, '..'))
+    , name = entry.path.replace(rel + '/', '')
     , ignore
 
-  ignore = entry.path.replace(rel + '/', '') === 'node_modules'
+  ignore = [
+    '.git',
+    '.hg',
+    '.svn',
+    'node_modules'
+  ].indexOf(name) === -1
+
   ignore = ignore && entry.stat.isDirectory()
   if(ignore) {
     entry.ignore()
