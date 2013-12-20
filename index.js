@@ -85,16 +85,17 @@ function jsmv(options) {
         }
 
         fs.writeFile(path.resolve(CWD, filename), data, next)
-      }
-    }
-  }
 
-  function next() {
-    if (!files.length) {
-      stream.queue('Updated ' + total + ' occurrences.\n')
-      return stream.queue(null)
+      }
+
     }
-    read_file(files.shift())
+    function next() {
+      if (!files.length) {
+        stream.queue('Updated ' + total + ' occurrences.\n')
+        return stream.queue(null)
+      }
+      read_file(files.shift())
+    }
   }
 }
 
