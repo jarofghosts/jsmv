@@ -85,9 +85,7 @@ function jsmv(options) {
         }
 
         fs.writeFile(path.resolve(CWD, filename), data, next)
-
       }
-
     }
     function next() {
       if (!files.length) {
