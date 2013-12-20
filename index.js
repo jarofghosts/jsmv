@@ -8,13 +8,15 @@ var through = require('through'),
 module.exports = jsmv
 
 function jsmv(options) {
-  var files = [],
-      started = false,
+  var is_require = select('call id[name=require]:first-child + literal'),
+      stream = through(parse_files, noop),
+      has_extension = /\.js$/,
+      lazy_require = /\/$/,
       relative = /^\./,
       shebang = /^#!/,
-      total = 0,
-      is_require = select('call id[name=require]:first-child + literal'),
-      stream = through(parse_files, noop)
+      started = false,
+      files = [],
+      total = 0
 
   if (options.dir) CWD = path.resolve(options.dir)
 
@@ -51,8 +53,8 @@ function jsmv(options) {
           req_string = required.value
 
           if (relative.test(req_string)) {
-            if (/\/$/.test(req_string)) req_string += 'index.js'
-            if (!/\.(js|json)$/.test(req_string)) req_string += '.js'
+            if (lazy_require.test(req_string)) req_string += 'index.js'
+            if (!has_extension.test(req_string)) req_string += '.js'
             req_string = path.resolve(path.dirname(filename), req_string)
           }
 
@@ -64,8 +66,8 @@ function jsmv(options) {
               options.to
 
             if (options.relative_to) {
-              if (!/^\./.test(to)) to = (/\//.test(to) ? '.' : './') + to
-              if (/\.js$/.test(to)) to = to.slice(0, -3)
+              if (!relative.test(to)) to = (/\//.test(to) ? '.' : './') + to
+              if (has_extension.test(to)) to = to.slice(0, -3)
             }
 
             quote = node.source().slice(-1)
@@ -83,16 +85,16 @@ function jsmv(options) {
         }
 
         fs.writeFile(path.resolve(CWD, filename), data, next)
-
-        function next() {
-          if (!files.length) {
-            stream.queue('Updated ' + total + ' occurrences.\n')
-            return stream.queue(null)
-          }
-          read_file(files.shift())
-        }
       }
     }
+  }
+
+  function next() {
+    if (!files.length) {
+      stream.queue('Updated ' + total + ' occurrences.\n')
+      return stream.queue(null)
+    }
+    read_file(files.shift())
   }
 }
 
