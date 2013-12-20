@@ -11,6 +11,7 @@ function jsmv(options) {
   var files = [],
       started = false,
       relative = /^\./,
+      shebang = /^#!/,
       total = 0,
       is_require = select('call id[name=require]:first-child + literal'),
       stream = through(parse_files, noop)
@@ -30,19 +31,20 @@ function jsmv(options) {
       fs.readFile(path.resolve(CWD, filename), 'utf8', process_file)
 
       function process_file(err, data) {
-        var split_data = data.split('\n'),
-            required,
+        var had_shebang = false,
             req_string,
-            line_number,
-            replace_rex,
-            code,
-            lines,
-            column,
+            required,
+            quote,
             to
 
-        data = 'function ____() {\n' + data.replace(/^#!(.*?)\n/, '\n') + '\n}'
+        if (shebang.test(data)) {
+          had_shebang = true
+          data = '//' + data
+        }
 
-        falafel(data, function(node) {
+        data = 'function ____() {\n' + data + '\n}'
+
+        data = '' + falafel(data, function(node) {
           required = is_require(node)
           if (!required) return
 
@@ -57,9 +59,6 @@ function jsmv(options) {
           if (options.from === req_string) {
             stream.queue('Updating ' + filename + '...\n')
 
-            code = data.slice(0, node.range[0])
-            lines = code.split('\n')
-            column = lines[lines.length - 1].length + 1
             to = options.relative_to ?
               path.relative(path.dirname(filename), options.to) :
               options.to
@@ -69,20 +68,21 @@ function jsmv(options) {
               if (/\.js$/.test(to)) to = to.slice(0, -3)
             }
 
-            line_number = code.match(/\n/g).length
-            replace_rex = new RegExp('(.{' + column + '})' +
-              required.value)
+            quote = node.source().slice(-1)
 
-            split_data[line_number - 1] = split_data[line_number - 1].replace(
-              replace_rex,
-              '$1' + to
-            )
+            node.update(quote + to + quote)
 
             total++
           }
         })
 
-        fs.writeFile(path.resolve(CWD, filename), split_data.join('\n'), next)
+        data = data.slice(18, -2)
+
+        if (had_shebang) {
+          data = data.slice(2)
+        }
+
+        fs.writeFile(path.resolve(CWD, filename), data, next)
 
         function next() {
           if (!files.length) {
