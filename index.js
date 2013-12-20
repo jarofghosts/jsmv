@@ -70,7 +70,7 @@ function jsmv(options) {
               if (has_extension.test(to)) to = to.slice(0, -3)
             }
 
-            quote = node.source().slice(-1)
+            quote = node.source()[0]
 
             node.update(quote + to + quote)
 
