@@ -27,33 +27,32 @@ var nopt = require('nopt'),
       f: ['--from'],
       t: ['--to']
     },
-    input,
-    options = nopt(noptions, shorts, process.argv)
-
-if (options.version) return version()
-if (options.help) return help()
-
-file_stream._read = function () {
-  var self = this
-
-  options.file && options.file.forEach(function (file) {
-    self.push(file)
-  })
-  self.push(null)
-}
-
-if (options.file) {
-  input = file_stream
-} else if (options.dir) {
-  input = lsstream(path.resolve(options.dir)).pipe(ignore_node_modules).pipe(dps('path'))
-} else {
-  input = lsstream(process.cwd()).pipe(ignore_node_modules).pipe(dps('path'))
-}
+    options = nopt(noptions, shorts, process.argv),
+    input
 
 options.from = options.from || options.argv.remain[0]
 options.to = options.to || options.argv.remain[1]
 
-if (!options.from || !options.to) return help()
+if (options.version) return version()
+if (options.help || !options.from || !options.to) return help()
+
+file_stream._read = function push_files() {
+  if (!options.file) return this.push(null)
+
+  for (var i = 0, l = options.file.length; i < l; ++i) {
+    this.push(options.file[i])
+  }
+
+  this.push(null)
+}
+
+if (options.file) {
+  input = file_stream
+} else {
+  input = lsstream(options.dir ? path.resolve(options.dir) : process.cwd())
+    .pipe(ignore_node_modules)
+    .pipe(dps('path'))
+}
 
 fs.exists(path.resolve(process.cwd(), options.to), check_from)
 
@@ -68,7 +67,6 @@ function help() {
 
 function check_from(is_relative) {
   options.relative_to = is_relative
-
   fs.exists(path.resolve(process.cwd(), options.from), run_jsmv)
 }
 
@@ -82,9 +80,9 @@ function run_jsmv(is_relative) {
 }
 
 function filter_entry(entry) {
-  var rel = path.resolve(path.join(entry.path, '..'))
-    , name = entry.path.replace(rel + '/', '')
-    , ignore
+  var rel = path.resolve(path.join(entry.path, '..')),
+      name = entry.path.replace(rel + '/', ''),
+      ignore
 
   ignore = [
     '.git',
@@ -94,7 +92,7 @@ function filter_entry(entry) {
   ].indexOf(name) === -1
 
   ignore = ignore && entry.stat.isDirectory()
-  if(ignore) {
+  if (ignore) {
     entry.ignore()
   }
 
