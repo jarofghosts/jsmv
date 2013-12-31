@@ -16,7 +16,7 @@
   },
   "homepage": "https://github.com/jarofghosts/jsmv",
   "scripts": {
-    "test": "node test/test.js && node test/relative-test.js && node test/other-relative-test.js"
+    "test": "node test/test.js && node test/relative-test.js && node test/other-relative-test.js && node test/shebang-test.js"
   },
   "keywords": [
     "rename",

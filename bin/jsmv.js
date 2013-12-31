@@ -37,13 +37,9 @@ if (options.version) return version()
 if (options.help || !options.from || !options.to) return help()
 
 file_stream._read = function push_files() {
-  if (!options.file) return this.push(null)
+  if (!options.file || !options.file.length) return this.push(null)
 
-  for (var i = 0, l = options.file.length; i < l; ++i) {
-    this.push(options.file[i])
-  }
-
-  this.push(null)
+  this.push(options.file.shift())
 }
 
 if (options.file) {

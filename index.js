@@ -7,9 +7,10 @@ var through = require('through'),
 
 module.exports = jsmv
 
-function jsmv(options) {
+function jsmv(_options) {
   var is_require = select('call id[name=require]:first-child + literal'),
       stream = through(parse_files, noop),
+      options = _options || {},
       has_extension = /\.js$/,
       lazy_require = /\/$/,
       relative = /^\./,
@@ -78,11 +79,7 @@ function jsmv(options) {
           }
         })
 
-        data = data.slice(18, -2)
-
-        if (had_shebang) {
-          data = data.slice(2)
-        }
+        data = data.slice((had_shebang ? 20 : 18), -2)
 
         fs.writeFile(path.resolve(CWD, filename), data, next)
       }
