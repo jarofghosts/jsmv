@@ -1,34 +1,38 @@
 #!/usr/bin/env node
 
-var nopt = require('nopt'),
-    jsmv = require('../'),
-    fs = require('fs'),
-    lsstream = require('ls-stream'),
-    filter = require('stream-police'),
-    file_stream = require('stream').Readable(),
-    through = require('through'),
-    dps = require('dotpath-stream'),
-    path = require('path'),
-    package = require('../package.json'),
-    ignore_node_modules = through(filter_entry),
-    noptions = {
-      version: Boolean,
-      help: Boolean,
-      dir: String,
-      file: Array,
-      from: String,
-      to: String
-    },
-    shorts = {
-      v: ['--version'],
-      h: ['--help'],
-      d: ['--dir'],
-      F: ['--file'],
-      f: ['--from'],
-      t: ['--to']
-    },
-    options = nopt(noptions, shorts, process.argv),
-    input
+var file_stream = require('stream').Readable()
+  , package = require('../package.json')
+  , filter = require('stream-police')
+  , lsstream = require('ls-stream')
+  , dps = require('dotpath-stream')
+  , through = require('through')
+  , path = require('path')
+  , nopt = require('nopt')
+  , jsmv = require('../')
+  , fs = require('fs')
+
+var ignore_node_modules = through(filter_entry)
+
+var noptions = {
+    version: Boolean
+  , help: Boolean
+  , dir: String
+  , file: Array
+  , from: String
+  , to: String
+}
+
+var shorts = {
+    v: ['--version']
+  , h: ['--help']
+  , d: ['--dir']
+  , F: ['--file']
+  , f: ['--from']
+  , t: ['--to']
+}
+
+var options = nopt(noptions, shorts, process.argv)
+  , input
 
 options.from = options.from || options.argv.remain[0]
 options.to = options.to || options.argv.remain[1]
@@ -70,24 +74,25 @@ function run_jsmv(is_relative) {
   if (is_relative) options.from = path.resolve(process.cwd(), options.from)
 
   input
-    .pipe(filter({ verify: [/\.js$/] }))
+    .pipe(filter({verify: [/\.js$/]}))
     .pipe(jsmv(options))
     .pipe(process.stdout)
 }
 
 function filter_entry(entry) {
-  var rel = path.resolve(path.join(entry.path, '..')),
-      name = entry.path.replace(rel + '/', ''),
-      ignore
+  var rel = path.resolve(path.join(entry.path, '..'))
+    , name = entry.path.replace(rel + '/', '')
+    , ignore
 
   ignore = [
-    '.git',
-    '.hg',
-    '.svn',
-    'node_modules'
+      '.git'
+    , '.hg'
+    , '.svn'
+    , 'node_modules'
   ].indexOf(name) === -1
 
   ignore = ignore && entry.stat.isDirectory()
+
   if (ignore) {
     entry.ignore()
   }

@@ -1,23 +1,24 @@
-var through = require('through'),
-    select = require('cssauron-falafel'),
-    falafel = require('falafel'),
-    fs = require('fs'),
-    path = require('path'),
-    CWD = process.cwd()
+var select = require('cssauron-falafel')
+  , through = require('through')
+  , falafel = require('falafel')
+  , path = require('path')
+  , fs = require('fs')
+
+var CWD = process.cwd()
 
 module.exports = jsmv
 
 function jsmv(_options) {
-  var is_require = select('call id[name=require]:first-child + literal'),
-      stream = through(parse_files, noop),
-      options = _options || {},
-      has_extension = /\.js$/,
-      lazy_require = /\/$/,
-      relative = /^\./,
-      shebang = /^#!/,
-      started = false,
-      files = [],
-      total = 0
+  var is_require = select('call id[name=require]:first-child + literal')
+    , stream = through(parse_files, noop)
+    , options = _options || {}
+    , has_extension = /\.js$/
+    , lazy_require = /\/$/
+    , relative = /^\./
+    , shebang = /^#!/
+    , started = false
+    , files = []
+    , total = 0
 
   if (options.dir) CWD = path.resolve(options.dir)
 
@@ -34,11 +35,11 @@ function jsmv(_options) {
       fs.readFile(path.resolve(CWD, filename), 'utf8', process_file)
 
       function process_file(err, data) {
-        var had_shebang = false,
-            req_string,
-            required,
-            quote,
-            to
+        var had_shebang = false
+          , req_string
+          , required
+          , quote
+          , to
 
         if (shebang.test(data)) {
           had_shebang = true
@@ -60,11 +61,11 @@ function jsmv(_options) {
           }
 
           if (options.from === req_string) {
-            stream.queue('Updating ' + filename + '...\n')
+            stream.queue('✓ ' + filename + '\n')
 
             to = options.relative_to ?
-              path.relative(path.dirname(filename), options.to) :
-              options.to
+                path.relative(path.dirname(filename), options.to) :
+                options.to
 
             if (options.relative_to) {
               if (!relative.test(to)) to = (/\//.test(to) ? '.' : './') + to
@@ -75,7 +76,7 @@ function jsmv(_options) {
 
             node.update(quote + to + quote)
 
-            total++
+            ++total
           }
         })
 

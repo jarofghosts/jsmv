@@ -16,7 +16,7 @@
   },
   "homepage": "https://github.com/jarofghosts/jsmv",
   "scripts": {
-    "test": "node test/test.js && node test/relative-test.js && node test/other-relative-test.js && node test/shebang-test.js"
+    "test": "tape test/*.test.js"
   },
   "keywords": [
     "rename",
@@ -26,12 +26,15 @@
   "author": "jesse keane",
   "license": "MIT",
   "dependencies": {
-    "through": "~2.3.4",
-    "falafel": "~0.3.1",
-    "cssauron-falafel": "~1.2.1",
+    "through": "2.3.4",
+    "falafel": "0.3.1",
+    "cssauron-falafel": "1.2.1",
     "stream-police": "0.0.2",
-    "nopt": "~2.1.2",
-    "ls-stream": "~1.0.0",
+    "nopt": "2.1.2",
+    "ls-stream": "1.0.0",
     "dotpath-stream": "0.0.0"
+  },
+  "devDependencies": {
+    "tape": "2.10.2"
   }
 }
