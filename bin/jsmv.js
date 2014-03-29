@@ -62,7 +62,7 @@ function version() {
 
 function help() {
   version()
-  fs.createReadStream(path.join(__dirname, '../help.txt')).pipe(process.stdout)
+  fs.createReadStream(path.join(__dirname, '../help.txt')).pipe(process.stderr)
 }
 
 function check_from(is_relative) {

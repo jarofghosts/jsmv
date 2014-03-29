@@ -9,7 +9,7 @@ var CWD = process.cwd()
 module.exports = jsmv
 
 function jsmv(_options) {
-  var is_require = select('call id[name=require]:first-child + literal')
+  var is_require = select('call > id[name=require]:first-child + literal')
     , stream = through(parse_files, noop)
     , options = _options || {}
     , has_extension = /\.js$/
