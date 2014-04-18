@@ -20,13 +20,13 @@ function jsmv(_options) {
     , files = []
     , total = 0
 
-  if (options.dir) CWD = path.resolve(options.dir)
+  if(options.dir) CWD = path.resolve(options.dir)
 
   return stream
 
   function parse_files(chunk) {
     files.push(chunk.toString())
-    if (!started) {
+    if(!started) {
       started = true
       read_file(files.shift())
     }
@@ -41,7 +41,7 @@ function jsmv(_options) {
           , quote
           , to
 
-        if (shebang.test(data)) {
+        if(shebang.test(data)) {
           had_shebang = true
           data = '//' + data
         }
@@ -50,30 +50,29 @@ function jsmv(_options) {
 
         data = '' + falafel(data, function(node) {
           required = is_require(node)
-          if (!required) return
+          if(!required) return
 
           req_string = required.value
 
-          if (relative.test(req_string)) {
-            if (lazy_require.test(req_string)) req_string += 'index.js'
-            if (!has_extension.test(req_string)) req_string += '.js'
+          if(relative.test(req_string)) {
+            if(lazy_require.test(req_string)) req_string += 'index.js'
+            if(!has_extension.test(req_string)) req_string += '.js'
             req_string = path.resolve(path.dirname(filename), req_string)
           }
 
-          if (options.from === req_string) {
+          if(options.from === req_string) {
             stream.queue('✓ ' + filename + '\n')
 
             to = options.relative_to ?
                 path.relative(path.dirname(filename), options.to) :
                 options.to
 
-            if (options.relative_to) {
-              if (!relative.test(to)) to = (/\//.test(to) ? '.' : './') + to
-              if (has_extension.test(to)) to = to.slice(0, -3)
+            if(options.relative_to) {
+              if(!relative.test(to)) to = (/\//.test(to) ? '.' : './') + to
+              if(has_extension.test(to)) to = to.slice(0, -3)
             }
 
             quote = node.source()[0]
-
             node.update(quote + to + quote)
 
             ++total
@@ -86,10 +85,11 @@ function jsmv(_options) {
       }
     }
     function next() {
-      if (!files.length) {
+      if(!files.length) {
         stream.queue('Updated ' + total + ' occurrences.\n')
         return stream.queue(null)
       }
+
       read_file(files.shift())
     }
   }
