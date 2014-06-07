@@ -16,7 +16,7 @@
   },
   "homepage": "https://github.com/jarofghosts/jsmv",
   "scripts": {
-    "test": "tape test/*.test.js"
+    "test": "tape test/index.js"
   },
   "keywords": [
     "rename",
@@ -28,10 +28,10 @@
   "dependencies": {
     "through": "2.3.4",
     "falafel": "0.3.1",
-    "cssauron-falafel": "1.2.1",
+    "cssauron-falafel": "^1.2.1",
     "stream-police": "0.0.2",
     "nopt": "2.1.2",
-    "ls-stream": "1.0.0",
+    "ls-stream": "^1.0.0",
     "dotpath-stream": "0.0.0"
   },
   "devDependencies": {

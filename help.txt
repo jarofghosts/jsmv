@@ -6,6 +6,7 @@ Options are:
 --to, -t <modulename>   | Rename all matches to <modulename>
 --dir, -d <dir>         | Search js files in <dir> (default CWD)
 --file, -F <file>       | Only search <file> for relevant modules
+--recurse, -r           | Recurse into subdirectories
 --version, -v           | Print current version
 --help, -h              | This thing
 

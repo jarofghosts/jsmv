@@ -16,6 +16,7 @@ var ignore_node_modules = through(filter_entry)
 var noptions = {
     version: Boolean
   , help: Boolean
+  , recurse: Boolean
   , dir: String
   , file: Array
   , from: String
@@ -24,6 +25,7 @@ var noptions = {
 
 var shorts = {
     v: ['--version']
+  , r: ['--recurse']
   , h: ['--help']
   , d: ['--dir']
   , F: ['--file']
@@ -37,16 +39,16 @@ var options = nopt(noptions, shorts, process.argv)
 options.from = options.from || options.argv.remain[0]
 options.to = options.to || options.argv.remain[1]
 
-if (options.version) return version()
-if (options.help || !options.from || !options.to) return help()
+if(options.version) return version()
+if(options.help || !options.from || !options.to) return help()
 
 file_stream._read = function push_files() {
-  if (!options.file || !options.file.length) return this.push(null)
+  if(!options.file || !options.file.length) return this.push(null)
 
   this.push(options.file.shift())
 }
 
-if (options.file) {
+if(options.file) {
   input = file_stream
 } else {
   input = lsstream(options.dir ? path.resolve(options.dir) : process.cwd())
@@ -62,7 +64,9 @@ function version() {
 
 function help() {
   version()
-  fs.createReadStream(path.join(__dirname, '../help.txt')).pipe(process.stderr)
+  fs.createReadStream(
+      path.join(__dirname, '..', 'help.txt')
+  ).pipe(process.stderr)
 }
 
 function check_from(is_relative) {
@@ -71,7 +75,7 @@ function check_from(is_relative) {
 }
 
 function run_jsmv(is_relative) {
-  if (is_relative) options.from = path.resolve(process.cwd(), options.from)
+  if(is_relative) options.from = path.resolve(process.cwd(), options.from)
 
   input
     .pipe(filter({verify: [/\.js$/]}))
@@ -80,8 +84,7 @@ function run_jsmv(is_relative) {
 }
 
 function filter_entry(entry) {
-  var rel = path.resolve(path.join(entry.path, '..'))
-    , name = entry.path.replace(rel + '/', '')
+  var name = path.basename(entry.path)
     , ignore
 
   ignore = [
@@ -89,13 +92,11 @@ function filter_entry(entry) {
     , '.hg'
     , '.svn'
     , 'node_modules'
-  ].indexOf(name) === -1
+  ].indexOf(name) > -1
 
-  ignore = ignore && entry.stat.isDirectory()
+  ignore = (ignore || !options.recurse) && entry.stat.isDirectory()
 
-  if (ignore) {
-    entry.ignore()
-  }
+  if(ignore) return entry.ignore()
 
-  this.queue(entry)
+  ignore_node_modules.queue(entry)
 }

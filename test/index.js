@@ -1,7 +1,8 @@
+var fs = require('fs')
+
+var test = require('tape')
+
 var jsmv = require('../')
-  , stream = require('stream')
-  , test = require('tape')
-  , fs = require('fs')
 
 fs.writeFileSync(
     __dirname + '/testfile1.js'
@@ -24,15 +25,10 @@ fs.writeFileSync(
 )
 
 test('change from named to relative module', function(t) {
-  var rs = stream.Readable()
+  var stream = jsmv({from: 'a', to: __dirname + '/b', relative_to: true})
 
-  rs._read = function() {
-    rs.push(__dirname + '/testfile1.js')
-    rs.push(null)
-  }
-
-  rs.pipe(jsmv({from: 'a', to: __dirname + '/b', relative_to: true}))
-    .on('end', verify_change)
+  stream.on('end', verify_change)
+  stream.write(__dirname + '/testfile1.js')
 
   function verify_change() {
     var file_contents = fs.readFileSync(__dirname + '/testfile1.js', 'utf8')
@@ -45,15 +41,10 @@ test('change from named to relative module', function(t) {
 })
 
 test('rewrite works with named modules', function(t) {
-  var rs = stream.Readable()
+  var stream = jsmv({from: __dirname + '/a.js', to: 'b', relative_to: false})
 
-  rs._read = function() {
-    rs.push(__dirname + '/testfile2.js')
-    rs.push(null)
-  }
-
-  rs.pipe(jsmv({ from: __dirname + '/a.js', to: 'b', relative_to: false }))
-    .on('end', verify_change)
+  stream.on('end', verify_change)
+  stream.write(__dirname + '/testfile2.js')
 
   function verify_change() {
     var file_contents = fs.readFileSync(__dirname + '/testfile2.js', 'utf8')
@@ -66,15 +57,10 @@ test('rewrite works with named modules', function(t) {
 })
 
 test('switches named modules', function(t) {
-  var rs = stream.Readable()
+  var stream = jsmv({from: 'a', to: 'b', relative_to: false})
 
-  rs._read = function() {
-    rs.push(__dirname + '/testfile3.js')
-    rs.push(null)
-  }
-
-  rs.pipe(jsmv({ from: 'a', to: 'b', relative_to: false }))
-    .on('end', verify_change)
+  stream.on('end', verify_change)
+  stream.write(__dirname + '/testfile3.js')
 
   function verify_change() {
     var file_contents = fs.readFileSync(__dirname + '/testfile3.js', 'utf8')
@@ -87,15 +73,10 @@ test('switches named modules', function(t) {
 })
 
 test('does not explode when js file has a shebang', function(t) {
-  var rs = stream.Readable()
+  var stream = jsmv({from: 'a', to: 'b', relative_to: false})
 
-  rs._read = function() {
-    rs.push(__dirname + '/testfile4.js')
-    rs.push(null)
-  }
-
-  rs.pipe(jsmv({ from: 'a', to: 'b', relative_to: false }))
-    .on('end', verify_change)
+  stream.on('end', verify_change)
+  stream.write(__dirname + '/testfile4.js')
 
   function verify_change() {
     var file_contents = fs.readFileSync(__dirname + '/testfile4.js', 'utf8')

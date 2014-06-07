@@ -1,7 +1,8 @@
 jsmv
 ====
 
-[![Build Status](https://travis-ci.org/jarofghosts/jsmv.png?branch=master)](https://travis-ci.org/jarofghosts/jsmv)
+[![Build Status](http://img.shields.io/travis/jarofghosts/jsmv.svg?style=flat)](https://travis-ci.org/jarofghosts/jsmv)
+[![npm install](http://img.shields.io/npm/dm/jsmv.svg?style=flat)](https://www.npmjs.org/package/jsmv)
 
 move around module names
 
@@ -27,6 +28,7 @@ Options are:
 * `--to, -t <modulename>` Rename all matches to `<modulename>`
 * `--dir, -d <dir>` Search javascript files in `<dir>` (default CWD)
 * `--file, -F <file>` Only search `<file>` for relevant modules
+* `--recurse, -r` Recurse into subdirectories
 * `--version, -v` Print current version
 * `--help, -h` This thing
 

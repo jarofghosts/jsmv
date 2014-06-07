@@ -10,7 +10,7 @@ module.exports = jsmv
 
 function jsmv(_options) {
   var is_require = select('call > id[name=require]:first-child + literal')
-    , stream = through(parse_files, noop)
+    , stream = through(parse_files, end)
     , options = _options || {}
     , has_extension = /\.js$/
     , lazy_require = /\/$/
@@ -93,6 +93,8 @@ function jsmv(_options) {
       read_file(files.shift())
     }
   }
-}
 
-function noop() {}
+  function end() {
+    if(!files.length && started) stream.queue(null)
+  }
+}
