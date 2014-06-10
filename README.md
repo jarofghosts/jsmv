@@ -4,7 +4,7 @@ jsmv
 [![Build Status](http://img.shields.io/travis/jarofghosts/jsmv.svg?style=flat)](https://travis-ci.org/jarofghosts/jsmv)
 [![npm install](http://img.shields.io/npm/dm/jsmv.svg?style=flat)](https://www.npmjs.org/package/jsmv)
 
-move around module names
+replace requires across your codebase
 
 ## installation
 
@@ -12,11 +12,12 @@ move around module names
 
 ## why
 
-so you can do `jsmv old-module.js new-module.js`
+so you can do `jsmv old-module.js new-module.js` to replace all requires to
+`old-module.js` to `new-module.js`. it will even take care of making sure all
+of your relative paths are correct!
 
-or even
-
-`jsmv modules/my-request.js request`
+or even `jsmv modules/my-request.js request` to replace any require for
+`modules/my-request.js` with the actual `request` module.
 
 ## usage
 
