@@ -12,18 +12,18 @@ replace requires across your codebase
 
 ## why
 
-so you can do `jsmv old-module.js new-module.js` to replace all requires to
+so you can do `jsmv old-module.js new-module.js` to replace all `require`s for
 `old-module.js` to `new-module.js`. it will even take care of making sure all
 of your relative paths are correct!
 
-or even `jsmv modules/my-request.js request` to replace any require for
+or even `jsmv modules/my-request.js request` to replace any `require` for
 `modules/my-request.js` with the actual `request` module.
 
 ## usage
 
 `jsmv [options] [from] [to]`
 
-Options are:
+options are:
 
 * `--from, -f <modulename>` Find files that require `<modulename>`
 * `--to, -t <modulename>` Rename all matches to `<modulename>`
