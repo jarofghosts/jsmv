@@ -1,6 +1,6 @@
 {
   "name": "jsmv",
-  "version": "0.3.2",
+  "version": "1.0.0",
   "preferGlobal": true,
   "bin": {
     "jsmv": "./bin/jsmv.js"
