@@ -25,7 +25,7 @@ fs.writeFileSync(
 )
 
 test('change from named to relative module', function(t) {
-  var stream = jsmv({from: 'a', to: __dirname + '/b', relative_to: true})
+  var stream = jsmv({from: 'a', to: __dirname + '/b', relativeTo: true})
 
   stream.on('end', verify_change)
   stream.write(__dirname + '/testfile1.js')

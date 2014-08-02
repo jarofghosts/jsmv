@@ -1,17 +1,22 @@
 #!/usr/bin/env node
 
-var file_stream = require('stream').Readable()
-  , package = require('../package.json')
+var fileStream = require('stream').Readable()
+  , path = require('path')
+  , fs = require('fs')
+
+var singleLog = require('single-line-log')(process.stdout)
   , filter = require('stream-police')
   , lsstream = require('ls-stream')
   , dps = require('dotpath-stream')
   , through = require('through')
-  , path = require('path')
   , nopt = require('nopt')
-  , jsmv = require('../')
-  , fs = require('fs')
 
-var ignore_node_modules = through(filter_entry)
+var package = require('../package.json')
+  , jsmv = require('../')
+
+var CWD = process.cwd()
+
+var ignoreNodeModules = through(filterEntry)
 
 var noptions = {
     version: Boolean
@@ -42,24 +47,24 @@ options.to = options.to || options.argv.remain[1]
 if(options.version) return version()
 if(options.help || !options.from || !options.to) return help()
 
-file_stream._read = function push_files() {
+fileStream._read = function pushFiles() {
   if(!options.file || !options.file.length) return this.push(null)
 
   this.push(options.file.shift())
 }
 
 if(options.file) {
-  input = file_stream
+  input = fileStream
 } else {
-  input = lsstream(options.dir ? path.resolve(options.dir) : process.cwd())
-    .pipe(ignore_node_modules)
+  input = lsstream(options.dir ? path.resolve(options.dir) : CWD)
+    .pipe(ignoreNodeModules)
     .pipe(dps('path'))
 }
 
-fs.exists(path.resolve(process.cwd(), options.to), check_from)
+fs.exists(path.resolve(CWD, options.to), checkFrom)
 
 function version() {
-  process.stdout.write('jsmv version ' + package.version + '\n')
+  process.stderr.write('jsmv version ' + package.version + '\n')
 }
 
 function help() {
@@ -69,21 +74,40 @@ function help() {
   ).pipe(process.stderr)
 }
 
-function check_from(is_relative) {
-  options.relative_to = is_relative
-  fs.exists(path.resolve(process.cwd(), options.from), run_jsmv)
+function checkFrom(isRelative) {
+  options.relativeTo = isRelative
+  fs.exists(path.resolve(CWD, options.from), runJsmv)
 }
 
-function run_jsmv(is_relative) {
-  if(is_relative) options.from = path.resolve(process.cwd(), options.from)
+function runJsmv(isRelative) {
+  if(isRelative) options.from = path.resolve(CWD, options.from)
 
   input
     .pipe(filter({verify: [/\.js$/]}))
     .pipe(jsmv(options))
-    .pipe(process.stdout)
+    .pipe(through(display))
 }
 
-function filter_entry(entry) {
+function display(file) {
+  file.filename = file.filename.slice(CWD.length + 1)
+
+  if(file.hasOwnProperty('total')) {
+    singleLog('\nUpdated ' + file.total + ' total occurence' +
+        (file.total !== 1 ? 's' : ''))
+
+    return process.stdout.write('\n')
+  }
+
+  singleLog('... ' + file.filename)
+
+  if(file.changed) {
+    singleLog('✓ ' + file.filename)
+    singleLog.clear()
+    process.stdout.write('\n')
+  }
+}
+
+function filterEntry(entry) {
   var name = path.basename(entry.path)
     , ignore
 
@@ -98,5 +122,5 @@ function filter_entry(entry) {
 
   if(ignore) return entry.ignore()
 
-  ignore_node_modules.queue(entry)
+  ignoreNodeModules.queue(entry)
 }

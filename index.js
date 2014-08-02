@@ -1,19 +1,20 @@
+var path = require('path')
+  , fs = require('fs')
+
 var select = require('cssauron-falafel')
   , through = require('through')
   , falafel = require('falafel')
-  , path = require('path')
-  , fs = require('fs')
 
 var CWD = process.cwd()
 
 module.exports = jsmv
 
 function jsmv(_options) {
-  var is_require = select('call > id[name=require]:first-child + literal')
-    , stream = through(parse_files, end)
+  var isRequire = select('call > id[name=require]:first-child + literal')
+    , stream = through(parseFiles, Function())
     , options = _options || {}
-    , has_extension = /\.js$/
-    , lazy_require = /\/$/
+    , hasExtension = /\.js$/
+    , lazyRequire = /\/$/
     , relative = /^\./
     , shebang = /^#!/
     , started = false
@@ -24,52 +25,67 @@ function jsmv(_options) {
 
   return stream
 
-  function parse_files(chunk) {
+  function parseFiles(chunk) {
     files.push(chunk.toString())
+
     if(!started) {
       started = true
-      read_file(files.shift())
+      readFile(files.shift())
     }
 
-    function read_file(filename) {
-      fs.readFile(path.resolve(CWD, filename), 'utf8', process_file)
+    function readFile(filename) {
+      fs.readFile(path.resolve(CWD, filename), 'utf8', processFile)
 
-      function process_file(err, data) {
-        var had_shebang = false
-          , req_string
+      function processFile(err, data) {
+        var hadShebang = false
+          , found = false
+          , reqString
           , required
           , quote
           , to
 
         if(shebang.test(data)) {
-          had_shebang = true
+          hadShebang = true
           data = '//' + data
         }
 
-        data = 'function ____() {\n' + data + '\n}'
+        data = 'function _() {\n' + data + '\n}'
 
-        data = '' + falafel(data, function(node) {
-          required = is_require(node)
+        stream.queue({filename: filename})
+
+        data = '' + falafel(data, parseNode)
+        
+        stream.queue({filename: filename, changed: found})
+
+        if(!found) return next()
+
+        data = data.slice((hadShebang ? 17 : 15), -2)
+
+        fs.writeFile(path.resolve(CWD, filename), data, next)
+
+        function parseNode(node) {
+          required = isRequire(node)
+
           if(!required) return
 
-          req_string = required.value
+          reqString = required.value
 
-          if(relative.test(req_string)) {
-            if(lazy_require.test(req_string)) req_string += 'index.js'
-            if(!has_extension.test(req_string)) req_string += '.js'
-            req_string = path.resolve(path.dirname(filename), req_string)
+          if(relative.test(reqString)) {
+            if(lazyRequire.test(reqString)) reqString += 'index.js'
+            if(!hasExtension.test(reqString)) reqString += '.js'
+            reqString = path.resolve(path.dirname(filename), reqString)
           }
 
-          if(options.from === req_string) {
-            stream.queue('✓ ' + filename + '\n')
+          if(options.from === reqString) {
+            found = true
 
-            to = options.relative_to ?
+            to = options.relativeTo ?
                 path.relative(path.dirname(filename), options.to) :
                 options.to
 
-            if(options.relative_to) {
+            if(options.relativeTo) {
               if(!relative.test(to)) to = (/\//.test(to) ? '.' : './') + to
-              if(has_extension.test(to)) to = to.slice(0, -3)
+              if(hasExtension.test(to)) to = to.slice(0, -3)
             }
 
             quote = node.source()[0]
@@ -77,24 +93,17 @@ function jsmv(_options) {
 
             ++total
           }
-        })
-
-        data = data.slice((had_shebang ? 20 : 18), -2)
-
-        fs.writeFile(path.resolve(CWD, filename), data, next)
+        }
       }
     }
+
     function next() {
       if(!files.length) {
-        stream.queue('Updated ' + total + ' occurrences.\n')
+        stream.queue({total: total})
         return stream.queue(null)
       }
 
-      read_file(files.shift())
+      readFile(files.shift())
     }
-  }
-
-  function end() {
-    if(!files.length && started) stream.queue(null)
   }
 }
