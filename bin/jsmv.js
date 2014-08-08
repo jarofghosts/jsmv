@@ -89,14 +89,14 @@ function runJsmv(isRelative) {
 }
 
 function display(file) {
-  file.filename = file.filename.slice(CWD.length + 1)
-
   if(file.hasOwnProperty('total')) {
     singleLog('\nUpdated ' + file.total + ' total occurence' +
         (file.total !== 1 ? 's' : ''))
 
     return process.stdout.write('\n')
   }
+
+  file.filename = file.filename.slice(CWD.length + 1)
 
   singleLog('... ' + file.filename)
 
