@@ -23,6 +23,7 @@ var noptions = {
   , help: Boolean
   , recurse: Boolean
   , dir: String
+  , require: Array
   , file: Array
   , from: String
   , to: String
@@ -32,11 +33,15 @@ var shorts = {
     v: ['--version']
   , r: ['--recurse']
   , h: ['--help']
+  , R: ['--require']
   , d: ['--dir']
   , F: ['--file']
   , f: ['--from']
   , t: ['--to']
 }
+
+var jsExtension = /\.js$/
+  , total = 0
 
 var options = nopt(noptions, shorts, process.argv)
   , input
@@ -83,28 +88,43 @@ function runJsmv(isRelative) {
   if(isRelative) options.from = path.resolve(CWD, options.from)
 
   input
-    .pipe(filter({verify: [/\.js$/]}))
-    .pipe(jsmv(options))
-    .pipe(through(display))
+    .pipe(filter(hasJSExtenstion))
+    .pipe(jsmv(options.from, options.to, options))
+      .on('read', displayRead)
+      .on('error', showError)
+    .pipe(through(display, end))
 }
 
-function display(file) {
-  if(file.hasOwnProperty('total')) {
-    singleLog('\nUpdated ' + file.total + ' total occurence' +
-        (file.total !== 1 ? 's' : ''))
+function hasJSExtenstion(data) {
+  return jsExtension.test(data.toString())
+}
 
-    return process.stdout.write('\n')
-  }
+function showError(err) {
+  process.stderr.write(err.message)
+  process.exit(1)
+}
 
-  file.filename = file.filename.slice(CWD.length + 1)
+function displayRead(filename) {
+  singleLog('... ' + fixFileName(filename))
+}
 
-  singleLog('... ' + file.filename)
+function display(filename) {
+  ++total
 
-  if(file.changed) {
-    singleLog('✓ ' + file.filename)
-    singleLog.clear()
-    process.stdout.write('\n')
-  }
+  singleLog('✓ ' + fixFileName(filename))
+  singleLog.clear()
+  process.stdout.write('\n')
+}
+
+function end() {
+  singleLog('\nUpdated ' + total + ' total occurence' +
+      (total !== 1 ? 's' : ''))
+
+  process.stdout.write('\n')
+}
+
+function fixFileName(filename) {
+  return filename.slice(CWD.length + 1)
 }
 
 function filterEntry(entry) {

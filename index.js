@@ -1,4 +1,5 @@
 var path = require('path')
+  , util = require('util')
   , fs = require('fs')
 
 var select = require('cssauron-falafel')
@@ -9,9 +10,8 @@ var CWD = process.cwd()
 
 module.exports = jsmv
 
-function jsmv(_options) {
-  var isRequire = select('call > id[name=require]:first-child + literal')
-    , stream = through(parseFiles, Function())
+function jsmv(from, to, _options) {
+  var stream = through(parseFiles, Function())
     , options = _options || {}
     , hasExtension = /\.js$/
     , lazyRequire = /\/$/
@@ -19,7 +19,8 @@ function jsmv(_options) {
     , shebang = /^#!/
     , started = false
     , files = []
-    , total = 0
+
+  var aliases = options.require || ['require']
 
   if(options.dir) CWD = path.resolve(options.dir)
 
@@ -37,12 +38,16 @@ function jsmv(_options) {
       fs.readFile(path.resolve(CWD, filename), 'utf8', processFile)
 
       function processFile(err, data) {
+        if(err) {
+          return stream.emit('error', err)
+        }
+
         var hadShebang = false
           , found = false
           , reqString
           , required
+          , moveTo
           , quote
-          , to
 
         if(shebang.test(data)) {
           hadShebang = true
@@ -51,15 +56,15 @@ function jsmv(_options) {
 
         data = 'function _() {\n' + data + '\n}'
 
-        stream.queue({filename: filename})
+        stream.emit('read', filename)
 
         data = '' + falafel(data, parseNode)
-        
-        stream.queue({filename: filename, changed: found})
 
         if(!found) return next()
 
-        data = data.slice((hadShebang ? 17 : 15), -2)
+        stream.queue(filename)
+
+        data = data.slice(hadShebang ? 17 : 15, -2)
 
         fs.writeFile(path.resolve(CWD, filename), data, next)
 
@@ -73,25 +78,27 @@ function jsmv(_options) {
           if(relative.test(reqString)) {
             if(lazyRequire.test(reqString)) reqString += 'index.js'
             if(!hasExtension.test(reqString)) reqString += '.js'
+
             reqString = path.resolve(path.dirname(filename), reqString)
           }
 
-          if(options.from === reqString) {
+          if(from === reqString) {
             found = true
 
-            to = options.relativeTo ?
-                path.relative(path.dirname(filename), options.to) :
-                options.to
+            moveTo = options.relativeTo ?
+              path.relative(path.dirname(filename), to) :
+              to
 
             if(options.relativeTo) {
-              if(!relative.test(to)) to = (/\//.test(to) ? '.' : './') + to
-              if(hasExtension.test(to)) to = to.slice(0, -3)
+              if(!relative.test(moveTo)) {
+                moveTo = (/\//.test(moveTo) ? '.' : './') + moveTo
+              }
+
+              if(hasExtension.test(moveTo)) moveTo = moveTo.slice(0, -3)
             }
 
             quote = node.source()[0]
-            node.update(quote + to + quote)
-
-            ++total
+            node.update(quote + moveTo + quote)
           }
         }
       }
@@ -99,11 +106,24 @@ function jsmv(_options) {
 
     function next() {
       if(!files.length) {
-        stream.queue({total: total})
         return stream.queue(null)
       }
 
       readFile(files.shift())
+    }
+  }
+
+  function isRequire(node) {
+    var selector
+      , result
+      , alias
+
+    for(var i = 0, len = aliases.length; i < len; ++i) {
+      alias = aliases[i]
+      selector = util.format('call > id[name=%s]:first-child + literal', alias)
+      result = select(selector)(node)
+
+      if(result) return result
     }
   }
 }
