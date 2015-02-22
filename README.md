@@ -31,6 +31,8 @@ options are:
 * `--dir, -d <dir>` Search javascript files in `<dir>` (default CWD)
 * `--file, -F <file>` Only search `<file>` for relevant modules
 * `--recurse, -r` Recurse into subdirectories
+* `--force` In the event of a deep-require, replace the module anyway
+* `--forceFull` For deep-requires, replace the whole require with `[to]`
 * `--version, -v` Print current version
 * `--help, -h` This thing
 
