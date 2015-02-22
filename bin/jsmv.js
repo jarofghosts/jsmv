@@ -23,6 +23,8 @@ var noptions = {
   , help: Boolean
   , recurse: Boolean
   , dir: String
+  , force: Boolean
+  , forceFull: Boolean
   , require: Array
   , file: Array
   , from: String
@@ -90,6 +92,7 @@ function runJsmv(isRelative) {
   input
     .pipe(filter(hasJSExtenstion))
     .pipe(jsmv(options.from, options.to, options))
+      .on('conflict', showConflict)
       .on('read', displayRead)
       .on('error', showError)
     .pipe(through(display, end))
@@ -102,6 +105,12 @@ function hasJSExtenstion(data) {
 function showError(err) {
   process.stderr.write(err.message)
   process.exit(1)
+}
+
+function showConflict(obj) {
+  process.stderr.write(
+      'Deep-require found: "' + obj.string + '" in ' + obj.file
+  )
 }
 
 function displayRead(filename) {

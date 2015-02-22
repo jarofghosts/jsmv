@@ -3,6 +3,7 @@ var path = require('path')
   , fs = require('fs')
 
 var select = require('cssauron-falafel')
+  , escape = require('quotemeta')
   , through = require('through')
   , falafel = require('falafel')
 
@@ -80,26 +81,46 @@ function jsmv(from, to, _options) {
             if(!hasExtension.test(reqString)) reqString += '.js'
 
             reqString = path.resolve(path.dirname(filename), reqString)
-          }
+          } else {
+              if(new RegExp('^' + escape(from) + '/.+').test(reqString) &&
+                  from !== reqString) {
+              if(options.force || options.forceFull) {
+                quote = node.source()[0]
+                found = true
 
-          if(from === reqString) {
-            found = true
+                moveTo = options.forceFull ?
+                  to :
+                  reqString.replace(new RegExp('^' + escape(from)), to)
 
-            moveTo = options.relativeTo ?
-              path.relative(path.dirname(filename), to) :
-              to
+                node.update(quote + moveTo + quote)
 
-            if(options.relativeTo) {
-              if(!relative.test(moveTo)) {
-                moveTo = (/\//.test(moveTo) ? '.' : './') + moveTo
+                return
               }
 
-              if(hasExtension.test(moveTo)) moveTo = moveTo.slice(0, -3)
+              stream.emit('conflict', {file: filename, string: reqString})
+
+              return
+            }
+          }
+
+          if(from !== reqString) return
+
+          found = true
+
+          moveTo = options.relativeTo ?
+            path.relative(path.dirname(filename), to) :
+            to
+
+          if(options.relativeTo) {
+            if(!relative.test(moveTo)) {
+              moveTo = (/\//.test(moveTo) ? '.' : './') + moveTo
             }
 
-            quote = node.source()[0]
-            node.update(quote + moveTo + quote)
+            if(hasExtension.test(moveTo)) moveTo = moveTo.slice(0, -3)
           }
+
+          quote = node.source()[0]
+          node.update(quote + moveTo + quote)
         }
       }
     }

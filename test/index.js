@@ -30,6 +30,11 @@ fs.writeFileSync(
   , fs.readFileSync(path.join(__dirname, 'dummyfile4.js'))
 )
 
+fs.writeFileSync(
+    path.join(__dirname, 'testfile6.js')
+  , fs.readFileSync(path.join(__dirname, 'dummyfile5.js'))
+)
+
 test('change from named to relative module', function(t) {
   var stream = jsmv('a', path.join(__dirname, 'b'), {relativeTo: true})
 
@@ -127,6 +132,78 @@ test('can provide aliases', function(t) {
     t.equal(
         "var test = wutever('b')\nvar herp = require('b')\n" + 
             "var derp = nope('a')\n"
+      , fileContents
+    )
+
+    t.end()
+  }
+})
+
+test('emits conflict on deep-require', function(t) {
+  var stream = jsmv('a', 'b')
+
+  stream.on('end', verifyChange)
+  stream.on('conflict', function(obj) {
+    t.equal(obj.string, 'a/c')
+    t.equal(obj.file, path.join(__dirname, 'testfile6.js'))
+  })
+
+  stream.write(path.join(__dirname, 'testfile6.js'))
+
+  function verifyChange() {
+    var fileContents = fs.readFileSync(
+        path.join(__dirname, 'testfile6.js')
+      , 'utf8'
+    )
+
+    t.equal(
+        "var test = require('a/c')\n"
+      , fileContents
+    )
+
+    t.end()
+  }
+})
+
+test('overwrites module name on force', function(t) {
+  var stream = jsmv('a', 'b', {force: true})
+
+  stream.on('end', verifyChange)
+
+  stream.write(path.join(__dirname, 'testfile6.js'))
+
+  function verifyChange() {
+    var fileContents = fs.readFileSync(
+        path.join(__dirname, 'testfile6.js')
+      , 'utf8'
+    )
+
+    t.equal(
+        "var test = require('b/c')\n"
+      , fileContents
+    )
+
+    t.end()
+  }
+})
+
+test('replaces fully with forceFull', function(t) {
+  var stream = jsmv('b', 'd', {forceFull: true})
+
+  stream.on('end', verifyChange)
+
+  stream.write(path.join(__dirname, 'testfile6.js'))
+
+  function verifyChange() {
+    var fileContents = fs.readFileSync(
+        path.join(__dirname, 'testfile6.js')
+      , 'utf8'
+    )
+
+    fs.unlinkSync(path.join(__dirname, 'testfile6.js'))
+
+    t.equal(
+        "var test = require('d')\n"
       , fileContents
     )
 
