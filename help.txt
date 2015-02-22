@@ -6,7 +6,10 @@ Options are:
 --to, -t <modulename>   | Rename all matches to <modulename>
 --dir, -d <dir>         | Search js files in <dir> (default CWD)
 --file, -F <file>       | Only search <file> for relevant modules
+--force                 | Rewrite in the event of a deep-require
+--forceFull             | Replace entire deep-require with [to]
 --recurse, -r           | Recurse into subdirectories
+--require, -R <name>    | Look for <name> instead of require
 --version, -v           | Print current version
 --help, -h              | This thing
 
