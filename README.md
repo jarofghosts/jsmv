@@ -1,8 +1,10 @@
-jsmv
-====
+# jsmv
 
-[![Build Status](http://img.shields.io/travis/jarofghosts/jsmv.svg?style=flat)](https://travis-ci.org/jarofghosts/jsmv)
-[![npm install](http://img.shields.io/npm/dm/jsmv.svg?style=flat)](https://www.npmjs.org/package/jsmv)
+[![Build Status](http://img.shields.io/travis/jarofghosts/jsmv.svg?style=flat-square)](https://travis-ci.org/jarofghosts/jsmv)
+[![npm install](http://img.shields.io/npm/dm/jsmv.svg?style=flat-square)](https://www.npmjs.org/package/jsmv)
+[![npm version](https://img.shields.io/npm/v/jsmv.svg?style=flat-square)](https://www.npmjs.org/package/jsmv)
+[![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/feross/standard)
+[![License](https://img.shields.io/npm/l/jsmv.svg?style=flat-square)](https://github.com/jarofghosts/jsmv/blob/master/LICENSE)
 
 replace requires across your codebase
 
