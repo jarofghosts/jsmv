@@ -36,6 +36,7 @@
     "quotemeta": "0.0.0",
     "single-line-log": "^1.0.0",
     "stream-police": "^1.0.0",
+    "strum": "^2.0.1",
     "through": "^2.3.8"
   },
   "devDependencies": {

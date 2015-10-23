@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-var fileStream = require('stream').Readable()
 var path = require('path')
 var fs = require('fs')
 
@@ -9,6 +8,7 @@ var filter = require('stream-police')
 var lsstream = require('ls-stream')
 var dps = require('dotpath-stream')
 var through = require('through')
+var strum = require('strum')
 var nopt = require('nopt')
 
 var pkg = require('../package.json')
@@ -66,16 +66,8 @@ function bin () {
     return help()
   }
 
-  fileStream._read = function pushFiles () {
-    if (!options.file || !options.file.length) {
-      return this.push(null)
-    }
-
-    this.push(options.file.shift())
-  }
-
   if (options.file) {
-    input = fileStream
+    input = strum(options.file)
   } else {
     input = lsstream(options.dir ? path.resolve(options.dir) : CWD)
       .pipe(ignoreNodeModules)
